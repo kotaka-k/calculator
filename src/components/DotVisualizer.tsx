@@ -1,9 +1,25 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import './DotVisualizer.css';
 
 interface DotVisualizerProps {
     value: number;
 }
+
+interface UnitDef {
+    val: number;
+    color: string;
+    label: string;
+}
+
+const UNIT_THRESHOLD = 3000;
+
+const UNITS: UnitDef[] = [
+    { val: 1, color: '#ff9f43', label: '1' }, // Orange
+    { val: 100, color: '#54a0ff', label: '100' }, // Blue
+    { val: 10000, color: '#5f27cd', label: '10,000' }, // Purple
+    { val: 1000000, color: '#10ac84', label: '100万' }, // Green
+    { val: 100000000, color: '#ee5253', label: '1億' }, // Red
+];
 
 export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,6 +40,36 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Calculate Composition based on dynamic units
+    const composition = useMemo(() => {
+        if (value === 0) return [];
+
+        const comps = [];
+
+        let baseUnitIndex = 0;
+        for (let i = 0; i < UNITS.length - 1; i++) {
+            if ((value / UNITS[i].val) > UNIT_THRESHOLD) {
+                baseUnitIndex = i + 1;
+            } else {
+                break;
+            }
+        }
+
+        let rem = value;
+
+        for (let i = baseUnitIndex; i >= 0; i--) {
+            const u = UNITS[i];
+            const count = Math.floor(rem / u.val);
+            rem = rem % u.val;
+
+            if (count > 0) {
+                comps.push({ unit: u, count });
+            }
+        }
+
+        return comps;
+    }, [value]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || dimensions.width === 0 || dimensions.height === 0) return;
@@ -34,47 +80,23 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
         ctx.clearRect(0, 0, dimensions.width, dimensions.height);
         if (value === 0) return;
 
-        // --- Unit Decomposition ---
-        const UNIT_MAN = 10000;
-        const UNIT_HYAKU = 100;
-
-        // Decompose
-        const countMan = Math.floor(value / UNIT_MAN);
-        const remMan = value % UNIT_MAN;
-
-        const countHyaku = Math.floor(remMan / UNIT_HYAKU);
-        const remHyaku = remMan % UNIT_HYAKU;
-
-        const countOne = remHyaku;
-
-        // Layout Logic
-        // Standard Grid with gaps is best.
-
+        // --- Layout Logic ---
         const getLayoutPos = (index: number) => {
-            // 1. Pos in 100-block (0-99)
+            // 10x10 blocks layout
             const idxInBlock = index % 100;
             const blockIdx = Math.floor(index / 100);
 
             const bx = idxInBlock % 10;
             const by = Math.floor(idxInBlock / 10);
 
-            // 2. Arrange blocks. 
-            // Let's say we arrange blocks in rows of 10 blocks (1000 dots total width).
-            // 10 blocks wide = 10 * (10 + gap) wide.
+            const blocksPerRow = 10;
+            const blockCol = blockIdx % blocksPerRow;
+            const blockRow = Math.floor(blockIdx / blocksPerRow);
 
-            const blockCol = blockIdx % 10;
-            const blockRow = Math.floor(blockIdx / 10);
-
-            // 3. Spacing
-            // Gap between blocks
             const GAP_BLOCK = 1.0;
 
             const x = (blockCol * (10 + GAP_BLOCK)) + bx;
             const y = (blockRow * (10 + GAP_BLOCK)) + by;
-
-            // Gap for 1000s? (Every 10 blocks is a row, so natural gap via blockRow)
-            // Gap for 10,000s? (Every 10 rows of blocks -> 100 blocks = 10,000 dots)
-            // Add extra gap every 10 block-rows.
 
             const group10k = Math.floor(blockRow / 10);
             const yGap = group10k * 2.0;
@@ -82,74 +104,62 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
             return { x: x, y: y + yGap };
         };
 
-        // Bounds Calculation
-        const calculateBounds = (cnt: number, offsetX: number, offsetY: number) => {
-            if (cnt === 0) return { mx: offsetX, my: offsetY };
-            // Check last item roughly
+        // Calculate Bounds for a count
+        const calculateBounds = (cnt: number, startY: number) => {
+            if (cnt === 0) return { width: 0, height: 0, maxY: startY };
             const last = getLayoutPos(cnt - 1);
             return {
-                mx: last.x + 1 + offsetX,
-                my: last.y + 1 + offsetY
+                width: last.x + 1,
+                height: last.y + 1,
+                maxY: startY + last.y + 1
             };
         };
 
-        // We stack sections vertically with colors.
+        let currentY = 0;
+        let maxVirtualW = 0;
 
-        // 1. Man Section
-        let manBounds = { mx: 0, my: 0 };
-        if (countMan > 0) {
-            manBounds = calculateBounds(countMan, 0, 0);
-        }
+        const layoutSections = composition.map(comp => {
+            const bounds = calculateBounds(comp.count, currentY);
+            const sectionStart = currentY;
+            const sectionH = bounds.height;
 
-        // 2. Hyaku Section
-        // Start Y is manBounds.my + gap
-        const manHeight = countMan > 0 ? manBounds.my : 0;
-        const hyakuStartY = manHeight + (countMan > 0 ? 5 : 0); // Gap 5 units
+            if (bounds.width > maxVirtualW) maxVirtualW = bounds.width;
 
-        let hyakuBounds = { mx: 0, my: 0 };
-        if (countHyaku > 0) {
-            const b = calculateBounds(countHyaku, 0, hyakuStartY);
-            hyakuBounds = { mx: b.mx, my: b.my };
-        }
+            const SECTION_GAP = 5;
+            currentY += sectionH + SECTION_GAP;
 
-        // 3. One Section
-        const hyakuHeight = countHyaku > 0 ? (hyakuBounds.my - hyakuStartY) : 0;
-        const oneStartY = hyakuStartY + hyakuHeight + (countHyaku > 0 ? 5 : 0);
+            return { ...comp, startY: sectionStart, bounds };
+        });
 
-        let oneBounds = { mx: 0, my: 0 };
-        if (countOne > 0) {
-            const b = calculateBounds(countOne, 0, oneStartY);
-            oneBounds = { mx: b.mx, my: b.my };
-        }
+        const totalVirtualH = Math.max(1, currentY - 5);
+        const totalVirtualW = Math.max(10, maxVirtualW); // Min width
 
-        const finalMaxX = Math.max(manBounds.mx, hyakuBounds.mx, oneBounds.mx);
-        const finalMaxY = Math.max(manBounds.my, hyakuBounds.my, oneBounds.my);
-
-        // Layout Width/Height calculated.
-        // Padding
-        const padding = 10;
+        // Scale
+        const padding = 20;
         const availW = dimensions.width - padding * 2;
         const availH = dimensions.height - padding * 2;
 
-        const scaleX = availW / finalMaxX;
-        const scaleY = availH / finalMaxY;
+        const scaleX = availW / totalVirtualW;
+        const scaleY = availH / totalVirtualH;
         const scale = Math.min(scaleX, scaleY);
 
         // Draw
-        const drawSection = (cnt: number, startYUrl: number, color: string) => {
-            const useRect = cnt > 5000; // Optimization
+        layoutSections.forEach(section => {
+            const { count, unit, startY } = section;
+            const color = unit.color;
 
+            const useRect = count > 5000;
             ctx.fillStyle = color;
 
-            for (let i = 0; i < cnt; i++) {
+            for (let i = 0; i < count; i++) {
                 const p = getLayoutPos(i);
                 const x = p.x * scale + padding;
-                const y = (p.y + startYUrl) * scale + padding;
+                const y = (p.y + startY) * scale + padding;
 
                 const size = scale * 0.8;
 
-                if (size < 1) {
-                    ctx.fillRect(x, y, Math.max(1, scale), Math.max(1, scale));
+                if (size < 0.8) {
+                    ctx.fillRect(x, y, 1, 1);
                     continue;
                 }
 
@@ -161,29 +171,18 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
                     ctx.fill();
                 }
             }
-        };
+        });
 
-        // Draw Man
-        if (countMan > 0) drawSection(countMan, 0, '#5f27cd'); // Purple for 10k
-
-        // Draw Hyaku
-        if (countHyaku > 0) drawSection(countHyaku, hyakuStartY, '#54a0ff'); // Blue for 100
-
-        // Draw One
-        if (countOne > 0) drawSection(countOne, oneStartY, '#ff9f43'); // Orange for 1
-
-        // Check if we need legend for current view
-        // Maybe draw text on canvas? Or just HTML Overlay. Use HTML Overlay (Legend).
-
-    }, [value, dimensions]);
+    }, [value, dimensions, composition]);
 
     return (
         <div className="dot-visualizer-container" ref={containerRef}>
             <div className="legend">
-                {/* Helper Legend */}
-                {value >= 10000 && <span style={{ color: '#5f27cd', marginRight: '10px' }}>● = 10,000</span>}
-                {value >= 100 && <span style={{ color: '#54a0ff', marginRight: '10px' }}>● = 100</span>}
-                <span style={{ color: '#ff9f43' }}>● = 1</span>
+                {composition.map((c, i) => (
+                    <span key={i} style={{ color: c.unit.color, marginRight: '15px', fontWeight: 'bold' }}>
+                        ● = {c.unit.label}
+                    </span>
+                ))}
                 <br />
                 かず: {value.toLocaleString()}
             </div>
