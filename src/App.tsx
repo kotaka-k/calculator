@@ -12,6 +12,8 @@ function App() {
     digits,
     incrementDigit,
     decrementDigit,
+    multiplyByTen,
+    divideByTen
   } = useNumberState();
 
   const { speak } = useSpeech();
@@ -23,38 +25,7 @@ function App() {
     setShowReading(true);
   };
 
-  // Hide reading text when value changes
-  // Or keep it? Request: "読み上げるボタンを押すまで読みがなは表示しない"
-  // Implies: Initially hidden. Show on click.
-  // Should it auto-hide when value changes?
-  // "9の状態で↑を押した際は10に..." -> If I change number, the reading is stale if I don't hide it or update it.
-  // Usually better to hide it or update it. 
-  // Let's hide it when value changes to encourage re-reading.
-  // Hook effect? Or just simplify: 
-  // We can track "lastSpokenValue". Or just reset on digits change.
-  // But modifying App state in useNumberState is hard. 
-  // Let's just use effect or key.
-
-  if (showReading && value !== parseInt(numberToJapanese(value) ? '0' : '0')) {
-    // This logic is tricky because numberToJapanese returns string.
-    // Let's just use a useEffect in component?
-    // No, let's just simpler:
-    // When `value` changes, `showReading` should probably be false?
-    // But `value` changes on every click.
-    // Let's assume we want to hide it immediately if number changes.
-  }
-
-  // Actually, let's keep it simple: 
-  // Just show it when clicked. 
-  // If value changes, maybe keep it hidden until clicked again? affirmative.
-
-  // We need to compare current value with spoken value to auto-hide?
-  // Or just simpler:
-  // On increment/decrement, we are calling hook. 
-  // We can pass a callback to useNumberState? No.
-  // Let's wrap value change handlers.
-
-  const handleValueChange = (fn: (p: number) => void, arg: number) => {
+  const handleValueChange = (fn: (p: any) => void, arg: any) => {
     fn(arg);
     setShowReading(false);
   };
@@ -72,6 +43,8 @@ function App() {
             digits={digits}
             onIncrementDigit={(p) => handleValueChange(incrementDigit, p)}
             onDecrementDigit={(p) => handleValueChange(decrementDigit, p)}
+            onMultiply={() => handleValueChange(multiplyByTen, undefined)}
+            onDivide={() => handleValueChange(divideByTen, undefined)}
           />
 
           <div className="speech-controls">

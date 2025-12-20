@@ -6,15 +6,31 @@ interface NumberDisplayProps {
     digits: number[];
     onIncrementDigit: (powerOfTen: number) => void;
     onDecrementDigit: (powerOfTen: number) => void;
+    onMultiply: () => void;
+    onDivide: () => void;
 }
 
 export const NumberDisplay: React.FC<NumberDisplayProps> = ({
     digits,
     onIncrementDigit,
     onDecrementDigit,
+    onMultiply,
+    onDivide
 }) => {
+    // Determine scale based on digits length
+    const scaleClass = digits.length > 6 ? 'scale-small' : digits.length > 4 ? 'scale-medium' : '';
+
     return (
-        <div className="number-display-container">
+        <div className={`number-display-container ${scaleClass}`}>
+            <div className="global-controls">
+                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 9}>
+                    ふやす
+                </button>
+                <button className="global-btn" onClick={onDivide} disabled={digits.length <= 1}>
+                    へらす
+                </button>
+            </div>
+
             <div className="digits-row">
                 {digits.map((digit, index) => {
                     // Calculate power of ten for this specific digit

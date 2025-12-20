@@ -11,10 +11,6 @@ export const useNumberState = () => {
         setValue(prev => {
             let next = prev + delta;
 
-            // Handle special case: if we are at 0 and decrease 10, should we go to min?
-            // Logic: 0 -> (-10) -> Clamps to 0. 
-            // This is expected.
-
             if (next > MAX_VAL) next = MAX_VAL;
             if (next < MIN_VAL) next = MIN_VAL;
 
@@ -30,14 +26,27 @@ export const useNumberState = () => {
         updateValue(-powerOfTen);
     }, []);
 
+    const multiplyByTen = useCallback(() => {
+        setValue(prev => {
+            const next = prev * 10;
+            if (next > MAX_VAL) return MAX_VAL;
+            return next;
+        });
+    }, []);
+
+    const divideByTen = useCallback(() => {
+        setValue(prev => Math.floor(prev / 10));
+    }, []);
+
     // Helper to get digits for display
-    // We want to ensure at least 1 digit is returned [0]
     const digits = value.toString().split('').map(Number);
 
     return {
         value,
         digits,
         incrementDigit,
-        decrementDigit
+        decrementDigit,
+        multiplyByTen,
+        divideByTen
     };
 };

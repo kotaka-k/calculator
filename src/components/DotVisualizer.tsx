@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import './DotVisualizer.css';
 
 interface DotVisualizerProps {
@@ -6,100 +6,105 @@ interface DotVisualizerProps {
 }
 
 export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
-    // Determine the "Unit" value for a single dot based on magnitude
-    // to prevent rendering millions of DOM nodes.
-    // Thresholds:
-    // <= 2,000: Unit 1 (Dots)
-    // <= 200,000: Unit 100 (Each dot is 100)
-    // <= 20,000,000: Unit 10,000
-    // > 20,000,000: Unit 1,000,000
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-    const unit = useMemo(() => {
-        if (value <= 2000) return 1;
-        if (value <= 500000) return 100;
-        if (value <= 50000000) return 10000;
-        return 1000000;
-    }, [value]);
+    // Handle resizing
+    useEffect(() => {
+        const handleResize = () => {
+            if (containerRef.current) {
+                setDimensions({
+                    width: containerRef.current.clientWidth,
+                    height: containerRef.current.clientHeight
+                });
+            }
+        };
 
-    const displayValue = Math.ceil(value / unit);
+        // Initial size
+        handleResize();
 
-    // Dynamic sizing logic
-    // We want the dots to fill ~75% of the screen (right panel).
-    // The right panel size is roughly window.innerWidth * 0.75 x window.innerHeight.
-    // We can approximate or use a ResizeObserver.
-    // For simplicity, let's use a ref and simple heuristic in CSS variables or key.
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-    // We categorize displayValue count to set a "density class".
-    const densityInfo = useMemo(() => {
-        if (displayValue <= 10) return { className: 'density-vv-low', dotSize: 40 };
-        if (displayValue <= 100) return { className: 'density-v-low', dotSize: 20 };
-        if (displayValue <= 500) return { className: 'density-low', dotSize: 10 };
-        if (displayValue <= 1000) return { className: 'density-medium', dotSize: 8 };
-        if (displayValue <= 5000) return { className: 'density-high', dotSize: 5 };
-        return { className: 'density-extreme', dotSize: 3 };
-    }, [displayValue]);
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || dimensions.width === 0 || dimensions.height === 0) return;
 
-    // Grouping Logic
-    // We visualize `displayValue` items.
-    // Grouping hierarchy:
-    // 10 items -> 1 Row/Group
-    // 100 items -> 1 Block (10x10)
-    // 1000 items -> 1 Large Block (collection of 10 Blocks)
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-    // We'll render hierarchically.
-    // Top Level: Thousands
-    // Next: Hundreds
-    // Next: Tens (if we want explicit rows, or just grid flow)
-    // Actually, standard grid flow of 10x10 blocks is easiest to read.
+        // Clear canvas
+        ctx.clearRect(0, 0, dimensions.width, dimensions.height);
 
-    // Let's break down `displayValue` into 100-blocks.
+        if (value === 0) return;
 
-    const blocks100 = useMemo(() => {
-        const blocks = [];
-        const numHundreds = Math.ceil(displayValue / 100);
+        // Optimization for large numbers (> 10k)
+        // Draw rectangles instead of arcs.
+        const useRect = value > 2000;
 
-        for (let i = 0; i < numHundreds; i++) {
-            const remaining = displayValue - (i * 100);
-            const count = Math.min(remaining, 100);
-            blocks.push(count);
+        // Margin for container
+        const padding = 10;
+        const drawW = dimensions.width - padding * 2;
+        const drawH = dimensions.height - padding * 2;
+
+        // Recalculate with padding logic
+        // We fit within drawW/drawH
+        const rRatio = drawW / drawH;
+        const rCols = Math.ceil(Math.sqrt(value * rRatio));
+        // const rRows = Math.ceil(value / rCols); // Unused explicitly if we calc rSize directly
+
+        // Effective size per cell
+        // rSize = width / cols. Also height / rows approx same.
+        const rSize = drawW / rCols;
+
+        // Recalc rows based on actual size to ensure fit?
+        // Not strictly needed for drawing loop
+
+        const count = value;
+
+        ctx.fillStyle = '#ff9f43'; // var(--color-dot) constant
+
+        for (let i = 0; i < count; i++) {
+            const c = i % rCols;
+            const r = Math.floor(i / rCols);
+
+            const x = c * rSize + padding;
+            const y = r * rSize + padding;
+            const d = rSize * 0.8; // Dot size (80% of cell)
+
+            // Skip drawing if too small (< 0.5px) -> Just fill rect?
+            if (d < 0.5) {
+                // Too small. Draw 1px point for visibility if possible or simple density.
+                // With 0.5px, rSize is < 0.6. 
+                // Just fill 1px.
+                ctx.fillRect(x, y, 1, 1);
+                continue;
+            }
+
+            if (useRect) {
+                ctx.fillRect(x, y, d, d);
+            } else {
+                ctx.beginPath();
+                ctx.arc(x + d / 2, y + d / 2, d / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
-        return blocks;
-    }, [displayValue]);
+
+    }, [value, dimensions]);
 
     return (
-        <div className={`dot-visualizer-container ${densityInfo.className}`}>
+        <div className="dot-visualizer-container" ref={containerRef}>
             <div className="legend">
-                現在のかず: {value.toLocaleString()}
-                {unit > 1 && <span className="unit-label"> (● = {unit.toLocaleString()})</span>}
+                かず: {value.toLocaleString()}
             </div>
-
-            <div className="dots-scroll-area">
-                <div className="blocks-container">
-                    {blocks100.map((count, idx) => (
-                        <HundredBlock key={idx} count={count} />
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const HundredBlock: React.FC<{ count: number }> = ({ count }) => {
-    // Render 100 items (or less)
-    // We can just render dots directly, Grid CSS handles the 10-per-row.
-    // However, to strictly visualize "10 rows of 10", CSS Grid 10 cols is perfect.
-
-    // Performance optimization: 
-    // If count < 100, we might strictly show empty slots? 
-    // No, standard is just show existing.
-
-    const dots = Array.from({ length: count });
-
-    return (
-        <div className="hundred-block">
-            {dots.map((_, i) => (
-                <div key={i} className="dot"></div>
-            ))}
+            <canvas
+                ref={canvasRef}
+                width={dimensions.width}
+                height={dimensions.height}
+                className="dot-canvas"
+            />
         </div>
     );
 };
