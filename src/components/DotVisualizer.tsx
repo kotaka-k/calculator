@@ -20,6 +20,9 @@ const UNITS: UnitDef[] = [
     { val: 10000, color: '#5f27cd', label: '10,000' }, // Purple
     { val: 1000000, color: '#10ac84', label: '100万' }, // Green
     { val: 100000000, color: '#ee5253', label: '1億' }, // Red
+    { val: 10000000000, color: '#ff9ff3', label: '100億' }, // Pink
+    { val: 1000000000000, color: '#feca57', label: '1兆' }, // Gold
+    { val: 100000000000000, color: '#00d2d3', label: '100兆' }, // Cyan
 ];
 
 export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
