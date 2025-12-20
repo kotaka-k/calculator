@@ -2,38 +2,21 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-lg);
-}
-
-.digit-controls {
-    display: flex;
-    gap: var(--spacing-md);
     margin-bottom: var(--spacing-md);
+    margin-top: 20vh;
+    /* Centered relative to view */
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.control-btn {
-    padding: 8px 16px;
-    color: #fff;
-    font-size: 1rem;
-}
-
-.control-btn.add-digit {
-    background-color: var(--color-primary);
-}
-
-.control-btn.remove-digit {
-    background-color: var(--color-primary);
-    filter: hue-rotate(45deg);
-    /* Slight variation or just same color */
-}
-
-.control-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    transform: none;
+.label-text {
+    margin-top: var(--spacing-sm);
+    font-size: 0.8rem;
+    color: var(--color-slot-text);
+    opacity: 0.7;
 }
 
 .digits-row {
@@ -41,7 +24,5 @@
     justify-content: center;
     align-items: center;
     background-color: #fff;
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: var(--spacing-sm);
 }

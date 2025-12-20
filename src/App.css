@@ -1,38 +1,83 @@
-/* Add to existing App.css content by overwriting whole file or use append logic if supported, but here I overwrite App.css */
-/* Re-declaring previous content + new additions */
-
+/* App.css */
 .app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Remove height 100% to allow scrolling if dots overflow */
-  min-height: 100vh;
-  padding: 20px;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-bg);
+  overflow: hidden;
+  /* Prevent body scroll, handle in panels */
 }
 
+.landscape-layout {
+  display: flex;
+  flex-direction: row;
+}
+
+.panel {
+  height: 100%;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left Panel: 25% */
+.left-panel {
+  width: 30%;
+  /* Slightly larger than 25% for usability on tablets? Request said 25/75 approx. Let's do 30/70 or 25/75 strict. */
+  width: 25%;
+  background-color: #fff;
+  border-right: 4px solid var(--color-secondary);
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+/* Right Panel: 75% */
+.right-panel {
+  width: 75%;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  padding: 0;
+  /* DotVisualizer handles padding */
+  overflow: hidden;
+}
+
+/* Typography & Controls */
 header h1 {
+  font-size: 1.5rem;
   color: var(--color-primary);
   margin-bottom: var(--spacing-lg);
-  font-size: 2.5rem;
-  text-shadow: 2px 2px 0px #fff;
+  text-align: center;
 }
 
-main {
-  width: 100%;
-  max-width: 800px;
+.controls-area {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.speech-controls {
+  margin-top: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .speak-btn {
   background-color: var(--color-accent);
   color: #5d4037;
-  font-size: 1.5rem;
-  padding: 12px 32px;
+  font-size: 1.2rem;
+  padding: 12px 24px;
   border-radius: 50px;
   box-shadow: 0 4px 0 #e1c028;
   margin-bottom: 12px;
+  width: 100%;
+  max-width: 200px;
 }
 
 .speak-btn:active {
@@ -41,9 +86,9 @@ main {
 }
 
 .reading-text {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: var(--color-text);
   font-weight: bold;
   height: 2rem;
-  /* Reserve space */
+  text-align: center;
 }
