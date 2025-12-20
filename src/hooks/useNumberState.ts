@@ -4,7 +4,7 @@ export const useNumberState = () => {
     const [value, setValue] = useState<number>(0);
 
     // Constants
-    const MAX_VAL = 999999999; // 9 digits
+    const MAX_VAL = 9999999999999999; // 16 digits (Max Safe Integer is ~9 quadrillion)
     const MIN_VAL = 0;
 
     const updateValue = (delta: number) => {
@@ -28,6 +28,7 @@ export const useNumberState = () => {
 
     const multiplyByTen = useCallback(() => {
         setValue(prev => {
+            if (prev === 0) return 10; // Special case: 0 * 10 = 0 usually, but here we want to jump start
             const next = prev * 10;
             if (next > MAX_VAL) return MAX_VAL;
             return next;

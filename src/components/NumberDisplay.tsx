@@ -18,12 +18,14 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
     onDivide
 }) => {
     // Determine scale based on digits length
-    const scaleClass = digits.length > 6 ? 'scale-small' : digits.length > 4 ? 'scale-medium' : '';
+    // With wrap, we don't need to shrink too aggressively unless line is full
+    // Max 16 digits. ~8 per line.
+    const scaleClass = digits.length > 7 ? 'scale-small' : digits.length > 5 ? 'scale-medium' : '';
 
     return (
         <div className={`number-display-container ${scaleClass}`}>
             <div className="global-controls">
-                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 9}>
+                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 16}>
                     ふやす
                 </button>
                 <button className="global-btn" onClick={onDivide} disabled={digits.length <= 1}>

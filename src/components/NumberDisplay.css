@@ -49,8 +49,9 @@
     align-items: center;
     background-color: #fff;
     padding: var(--spacing-sm);
-    /* Allow wrapping if absolutely necessary, but scaling is better */
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    /* Allow wrapping for > 10 digits */
+    max-width: 100%;
 }
 
 /* Scaling Logic */

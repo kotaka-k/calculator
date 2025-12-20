@@ -47,25 +47,28 @@ export const numberToJapanese = (num: number): string => {
 
     let result = '';
 
-    // Oku (100,000,000s)
-    const oku = Math.floor(num / 100000000);
-    const remainderOku = num % 100000000;
+    // Cho (1 Trillion) 10^12
+    const cho = Math.floor(num / 1000000000000);
+    const remainderCho = num % 1000000000000;
+
+    if (cho > 0) {
+        result += read4Digits(cho) + 'ちょう ';
+    }
+
+    // Oku (100 Million) 10^8
+    const oku = Math.floor(remainderCho / 100000000);
+    const remainderOku = remainderCho % 100000000;
 
     if (oku > 0) {
         result += read4Digits(oku) + 'おく ';
     }
 
-    // Man (10,000s)
-    // Need to handle 10000-99999999 range within 'man' block
-    // Actually remainderOku is max 99999999.
-    // Man part is floor(remainderOku / 10000). Max 9999.
-
+    // Man (10,000) 10^4
     const man = Math.floor(remainderOku / 10000);
     const remainderMan = remainderOku % 10000;
 
     if (man > 0) {
-        const manRead = read4Digits(man);
-        result += manRead + 'まん ';
+        result += read4Digits(man) + 'まん ';
     }
 
     // Under 10,000
