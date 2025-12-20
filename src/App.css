@@ -16,23 +16,29 @@
 }
 
 .panel {
-  height: 100%;
+  flex: 1;
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  /* Start content from top */
 }
 
 /* Left Panel: 25% */
 .left-panel {
-  width: 30%;
-  /* Slightly larger than 25% for usability on tablets? Request said 25/75 approx. Let's do 30/70 or 25/75 strict. */
   width: 25%;
   background-color: #fff;
   border-right: 4px solid var(--color-secondary);
-  align-items: center;
-  justify-content: flex-start;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
   z-index: 10;
+
+  /* Scrolling Logic */
+  height: 100%;
+  overflow-y: auto;
+  /* Allow scrolling */
+  min-height: 0;
 }
 
 /* Right Panel: 75% */
@@ -44,6 +50,7 @@
   padding: 0;
   /* DotVisualizer handles padding */
   overflow: hidden;
+  /* Canvas clipping */
 }
 
 /* Typography & Controls */
@@ -61,6 +68,8 @@ header h1 {
   align-items: center;
   justify-content: center;
   width: 100%;
+  flex-shrink: 0;
+  /* Prevent shrinking when scrolling */
 }
 
 .speech-controls {
