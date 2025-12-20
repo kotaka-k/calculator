@@ -1,7 +1,10 @@
 /* App.css */
 .app-container {
   width: 100vw;
+  /* Fallback for browsers that don't support dvh */
   height: 100vh;
+  /* Dynamic viewport height for modern mobile browsers */
+  height: 100dvh;
   background-color: var(--color-bg);
   overflow: hidden;
   /* Prevent body scroll, handle in panels */

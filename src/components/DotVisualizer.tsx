@@ -12,7 +12,6 @@ interface UnitDef {
 }
 
 // Draw Limit Threshold
-// Changed to 10000 as requested
 const UNIT_THRESHOLD = 10000;
 
 const UNITS: UnitDef[] = [
@@ -107,18 +106,79 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
         };
 
         // Calculate Bounds for a count
+        // Fixed: Account for full block rows/heights to avoid overlaps/clipping
         const calculateBounds = (cnt: number, startY: number) => {
             if (cnt === 0) return { width: 0, height: 0, maxY: startY };
-            const last = getLayoutPos(cnt - 1);
+
+            const lastIdx = cnt - 1;
+            const lastPos = getLayoutPos(lastIdx);
+
+            // Analyze Layout to determine Max Width/Height
+            const blockIdx = Math.floor(lastIdx / 100);
+            const blocksPerRow = 10;
+            const blockRow = Math.floor(blockIdx / blocksPerRow);
+            const colInRow = blockIdx % blocksPerRow;
+            const GAP_BLOCK = 1.0;
+
+            // --- Width Calculation ---
+            let width = lastPos.x + 1;
+
+            if (blockRow > 0) {
+                // If we entered the 2nd row of blocks, 1st row (10 blocks) is definitely full.
+                // Max width is the width of 10 full blocks.
+                // 10 blocks * (10 width + 1 gap) - 1 gap
+                // Block 9 (last col) end x
+                // Width = (9 * 11) + 10 = 99 + 10 = 109 roughly.
+                const maxBlockCol = 9;
+                // last dot in block has bx=9.
+                width = (maxBlockCol * (10 + GAP_BLOCK)) + 9 + 1;
+            } else {
+                // First row of blocks.
+                // If we are in blockIdx > 0, previous blocks are full width (10).
+                // If we are deep inside a block (by > 0), that block is full width (10).
+                const idxInBlock = lastIdx % 100;
+                const by = Math.floor(idxInBlock / 10);
+
+                if (by > 0) {
+                    // Current block is full width
+                    const startX = colInRow * (10 + GAP_BLOCK);
+                    width = startX + 10;
+                }
+                // If by == 0, current block width is lastPos.x (correct).
+            }
+
+            // --- Height Calculation ---
+            let height = lastPos.y + 1;
+
+            // Block Start Y Logic from getLayoutPos:
+            const group10k = Math.floor(blockRow / 10);
+            const yGap = group10k * 2.0;
+            const blockRowStartY = (blockRow * (10 + GAP_BLOCK)) + yGap;
+
+            // If this is NOT the first block in the row (colInRow > 0),
+            // then previous blocks to the left are FULL HEIGHT (10 dots high).
+            // The section height must encompass those full blocks to avoid next section overlapping them.
+            if (colInRow > 0) {
+                height = blockRowStartY + 10;
+            } else {
+                // First block in the row.
+                // If blockRow > 0, previous rows are full height.
+                // Current block height is determined by lastPos.y.
+                // This is correct for the bounding box.
+            }
+
             return {
-                width: last.x + 1,
-                height: last.y + 1,
-                maxY: startY + last.y + 1
+                width: width,
+                height: height,
+                maxY: startY + height
             };
         };
 
         let currentY = 0;
         let maxVirtualW = 0;
+
+        // Gap Logic
+        const SECTION_GAP = 2.0;
 
         const layoutSections = composition.map(comp => {
             const bounds = calculateBounds(comp.count, currentY);
@@ -127,19 +187,18 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
 
             if (bounds.width > maxVirtualW) maxVirtualW = bounds.width;
 
-            // Advance Y for next section if current section is not empty
-            // Gap between sections
-            // Reduced gap to bring sections closer
-            const SECTION_GAP = 1.0;
-            currentY += sectionH + SECTION_GAP;
+            // Only add gap if section has height
+            if (sectionH > 0) {
+                currentY += sectionH + SECTION_GAP;
+            }
 
             return { ...comp, startY: sectionStart, bounds };
         });
 
         // Total Virtual Height
-        // Add extra padding to total height to ensure bottom is not clipped
-        const totalVirtualH = Math.max(1, currentY); // kept last gap as padding
-        const totalVirtualW = Math.max(10, maxVirtualW);
+        // Use currentY directly (includes last gap, acts as padding)
+        const totalVirtualH = Math.max(1, currentY);
+        const totalVirtualW = Math.max(10, maxVirtualW); // Min width
 
         // Scale
         const padding = 20;
@@ -149,11 +208,8 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
         const scaleX = availW / totalVirtualW;
         const scaleY = availH / totalVirtualH;
 
-        // Use slightly smaller scale factor to ensure fit (95%)
-        const scale = Math.min(scaleX, scaleY) * 0.98;
-
-        // Center logic?
-        // Currently top-left aligned + padding.
+        // Scale margin 0.95
+        const scale = Math.min(scaleX, scaleY) * 0.95;
 
         // Draw
         layoutSections.forEach(section => {
