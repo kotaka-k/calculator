@@ -16,6 +16,7 @@ function App() {
     divideByTen
   } = useNumberState();
 
+  /* Speech Logic */
   const { speak } = useSpeech();
   const [showReading, setShowReading] = useState(false);
 
@@ -25,7 +26,7 @@ function App() {
     setShowReading(true);
   };
 
-  const handleValueChange = (fn: (p: any) => void, arg: any) => {
+  const handleValueChange = (fn: (p?: any) => void, arg?: any) => {
     fn(arg);
     setShowReading(false);
   };

@@ -4,8 +4,8 @@ import './NumberDisplay.css';
 
 interface NumberDisplayProps {
     digits: number[];
-    onIncrementDigit: (powerOfTen: number) => void;
-    onDecrementDigit: (powerOfTen: number) => void;
+    onIncrementDigit: (powerOfTen: bigint) => void;
+    onDecrementDigit: (powerOfTen: bigint) => void;
     onMultiply: () => void;
     onDivide: () => void;
 }
@@ -25,7 +25,7 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
     return (
         <div className={`number-display-container ${scaleClass}`}>
             <div className="global-controls">
-                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 16}>
+                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 69}>
                     ふやす
                 </button>
                 <button className="global-btn" onClick={onDivide} disabled={digits.length <= 1}>
@@ -36,9 +36,9 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
             <div className="digits-row">
                 {digits.map((digit, index) => {
                     // Calculate power of ten for this specific digit
-                    // digits: [1, 2, 3] (value 123)
-                    // index 0 -> digit '1' -> 100s place -> power 10^2
-                    const powerOfTen = Math.pow(10, digits.length - 1 - index);
+                    // use BigInt
+                    const power = digits.length - 1 - index;
+                    const powerOfTen = 10n ** BigInt(power);
 
                     return (
                         <DigitColumn

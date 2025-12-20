@@ -1,13 +1,16 @@
 import { useState, useCallback } from 'react';
 
 export const useNumberState = () => {
-    const [value, setValue] = useState<number>(0);
+    // Use BigInt for value to support up to 10^68 (Muryotaisu)
+    const [value, setValue] = useState<bigint>(0n);
 
     // Constants
-    const MAX_VAL = 9999999999999999; // 16 digits (Max Safe Integer is ~9 quadrillion)
-    const MIN_VAL = 0;
+    // Muryotaisu is 10^68. Let's set max slightly above or exact.
+    // 10^68 is 1 followed by 68 zeros. (69 digits)
+    const MAX_VAL = 10n ** 69n - 1n;
+    const MIN_VAL = 0n;
 
-    const updateValue = (delta: number) => {
+    const updateValue = (delta: bigint) => {
         setValue(prev => {
             let next = prev + delta;
 
@@ -18,28 +21,29 @@ export const useNumberState = () => {
         });
     };
 
-    const incrementDigit = useCallback((powerOfTen: number) => {
+    const incrementDigit = useCallback((powerOfTen: bigint) => {
         updateValue(powerOfTen);
     }, []);
 
-    const decrementDigit = useCallback((powerOfTen: number) => {
+    const decrementDigit = useCallback((powerOfTen: bigint) => {
         updateValue(-powerOfTen);
     }, []);
 
     const multiplyByTen = useCallback(() => {
         setValue(prev => {
-            if (prev === 0) return 10; // Special case: 0 * 10 = 0 usually, but here we want to jump start
-            const next = prev * 10;
+            if (prev === 0n) return 10n;
+            const next = prev * 10n;
             if (next > MAX_VAL) return MAX_VAL;
             return next;
         });
     }, []);
 
     const divideByTen = useCallback(() => {
-        setValue(prev => Math.floor(prev / 10));
+        setValue(prev => prev / 10n);
     }, []);
 
     // Helper to get digits for display
+    // BigInt.toString() works like Number.toString()
     const digits = value.toString().split('').map(Number);
 
     return {
