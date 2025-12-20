@@ -1,0 +1,37 @@
+.digit-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 4px;
+}
+
+.digit-display {
+    background-color: var(--color-slot-bg);
+    border: var(--border-width) solid var(--color-slot-text);
+    border-radius: var(--border-radius-sm);
+    width: 60px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--color-slot-text);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.digit-btn {
+    background-color: var(--color-secondary);
+    color: white;
+    width: 50px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.digit-btn:active {
+    background-color: #3cbdb4;
+}

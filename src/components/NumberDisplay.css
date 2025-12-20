@@ -1,0 +1,47 @@
+.number-display-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md);
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.digit-controls {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.control-btn {
+    padding: 8px 16px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.control-btn.add-digit {
+    background-color: var(--color-primary);
+}
+
+.control-btn.remove-digit {
+    background-color: var(--color-primary);
+    filter: hue-rotate(45deg);
+    /* Slight variation or just same color */
+}
+
+.control-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.digits-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

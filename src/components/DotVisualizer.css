@@ -1,0 +1,57 @@
+.dot-visualizer {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    overflow-y: auto;
+    max-height: 50vh;
+    /* Scrollable if too many */
+}
+
+.hundred-block {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    border: 2px dashed #ccc;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.dot {
+    background-color: var(--color-dot);
+    border-radius: 50%;
+    aspect-ratio: 1;
+    /* Make it a circle */
+}
+
+/* Sizing variations */
+.size-large .dot {
+    width: 20px;
+    height: 20px;
+}
+
+.size-large .hundred-block {
+    gap: 8px;
+}
+
+.size-medium .dot {
+    width: 12px;
+    height: 12px;
+}
+
+.size-small .dot {
+    width: 6px;
+    height: 6px;
+}
+
+.size-small .hundred-block {
+    gap: 2px;
+    padding: 4px;
+}
+
+/* Make 10th dot distinct? Maybe margin? */
+/* Actually grid handles layout. */
+/* Using flex might be better for wrapping, but grid 10 columns ensures 10 per row. */

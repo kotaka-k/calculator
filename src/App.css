@@ -1,0 +1,49 @@
+/* Add to existing App.css content by overwriting whole file or use append logic if supported, but here I overwrite App.css */
+/* Re-declaring previous content + new additions */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Remove height 100% to allow scrolling if dots overflow */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+header h1 {
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-lg);
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 0px #fff;
+}
+
+main {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.speak-btn {
+  background-color: var(--color-accent);
+  color: #5d4037;
+  font-size: 1.5rem;
+  padding: 12px 32px;
+  border-radius: 50px;
+  box-shadow: 0 4px 0 #e1c028;
+  margin-bottom: 12px;
+}
+
+.speak-btn:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.reading-text {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  font-weight: bold;
+  height: 2rem;
+  /* Reserve space */
+}
