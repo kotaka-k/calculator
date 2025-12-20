@@ -11,6 +11,8 @@ interface UnitDef {
     label: string;
 }
 
+// Draw Limit Threshold
+// Changed to 10000 as requested
 const UNIT_THRESHOLD = 10000;
 
 const UNITS: UnitDef[] = [
@@ -125,14 +127,19 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
 
             if (bounds.width > maxVirtualW) maxVirtualW = bounds.width;
 
-            const SECTION_GAP = 5;
+            // Advance Y for next section if current section is not empty
+            // Gap between sections
+            // Reduced gap to bring sections closer
+            const SECTION_GAP = 1.0;
             currentY += sectionH + SECTION_GAP;
 
             return { ...comp, startY: sectionStart, bounds };
         });
 
-        const totalVirtualH = Math.max(1, currentY - 5);
-        const totalVirtualW = Math.max(10, maxVirtualW); // Min width
+        // Total Virtual Height
+        // Add extra padding to total height to ensure bottom is not clipped
+        const totalVirtualH = Math.max(1, currentY); // kept last gap as padding
+        const totalVirtualW = Math.max(10, maxVirtualW);
 
         // Scale
         const padding = 20;
@@ -141,7 +148,12 @@ export const DotVisualizer: React.FC<DotVisualizerProps> = ({ value }) => {
 
         const scaleX = availW / totalVirtualW;
         const scaleY = availH / totalVirtualH;
-        const scale = Math.min(scaleX, scaleY);
+
+        // Use slightly smaller scale factor to ensure fit (95%)
+        const scale = Math.min(scaleX, scaleY) * 0.98;
+
+        // Center logic?
+        // Currently top-left aligned + padding.
 
         // Draw
         layoutSections.forEach(section => {
