@@ -11,7 +11,7 @@ interface UnitDef {
     label: string;
 }
 
-const UNIT_THRESHOLD = 3000;
+const UNIT_THRESHOLD = 10000;
 
 const UNITS: UnitDef[] = [
     { val: 1, color: '#ff9f43', label: '1' }, // Orange
