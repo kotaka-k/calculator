@@ -4,6 +4,7 @@ import './NumberDisplay.css';
 
 interface NumberDisplayProps {
     digits: number[];
+    maxDigits: number; // Added for limit control
     onIncrementDigit: (powerOfTen: bigint) => void;
     onDecrementDigit: (powerOfTen: bigint) => void;
     onMultiply: () => void;
@@ -12,6 +13,7 @@ interface NumberDisplayProps {
 
 export const NumberDisplay: React.FC<NumberDisplayProps> = ({
     digits,
+    maxDigits, // Add this
     onIncrementDigit,
     onDecrementDigit,
     onMultiply,
@@ -25,7 +27,7 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
     return (
         <div className={`number-display-container ${scaleClass}`}>
             <div className="global-controls">
-                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= 69}>
+                <button className="global-btn" onClick={onMultiply} disabled={digits.length >= maxDigits}>
                     ふやす
                 </button>
                 <button className="global-btn" onClick={onDivide} disabled={digits.length <= 1}>

@@ -16,9 +16,13 @@
 .global-controls {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 40px;
+    /* Increased margin to prevent mis-clicks */
     width: 100%;
     justify-content: center;
+    border-bottom: 2px dashed #eee;
+    /* Light separator */
+    padding-bottom: 20px;
 }
 
 .global-btn {

@@ -10,15 +10,18 @@ function App() {
   const {
     value,
     digits,
+    maxDigits,
     incrementDigit,
     decrementDigit,
     multiplyByTen,
-    divideByTen
+    divideByTen,
+    setMaxDigits
   } = useNumberState();
 
   /* Speech Logic */
   const { speak } = useSpeech();
   const [showReading, setShowReading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleSpeak = () => {
     const text = numberToJapanese(value);
@@ -31,8 +34,45 @@ function App() {
     setShowReading(false);
   };
 
+  const digitLimits = [
+    { label: '5けた (万)', value: 5 },
+    { label: '9けた (億)', value: 9 },
+    { label: '16けた (京)', value: 16 },
+    { label: '69けた (無量大数)', value: 69 },
+  ];
+
   return (
     <div className="app-container landscape-layout">
+      {/* Settings Button */}
+      <button
+        className="settings-btn"
+        onClick={() => setShowSettings(!showSettings)}
+        aria-label="設定"
+      >
+        ⚙️
+      </button>
+
+      {/* Settings Menu */}
+      {showSettings && (
+        <div className="settings-menu">
+          <h3>けたの おおきさ</h3>
+          <div className="settings-options">
+            {digitLimits.map(limit => (
+              <button
+                key={limit.value}
+                className={`limit-option ${maxDigits === limit.value ? 'active' : ''}`}
+                onClick={() => {
+                  setMaxDigits(limit.value);
+                  setShowSettings(false);
+                }}
+              >
+                {limit.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Left Panel: Controls */}
       <section className="panel left-panel">
         <header>
@@ -42,6 +82,7 @@ function App() {
         <div className="controls-area">
           <NumberDisplay
             digits={digits}
+            maxDigits={maxDigits}
             onIncrementDigit={(p) => handleValueChange(incrementDigit, p)}
             onDecrementDigit={(p) => handleValueChange(decrementDigit, p)}
             onMultiply={() => handleValueChange(multiplyByTen, undefined)}
