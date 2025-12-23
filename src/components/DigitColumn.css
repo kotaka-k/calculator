@@ -34,21 +34,20 @@
 .digit-btn {
     background-color: var(--color-btn-digit);
     border: none;
-    color: white;
-    font-size: 0.6rem;
-    /* Smaller arrows */
+    color: #333;
+    /* Black/Dark gray for better visibility */
+    font-size: 0.8rem;
+    /* Restored size */
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
 
-    /* Extra Slim Look */
+    /* Slim & Integrated Look (Restored) */
     width: 100%;
-    height: 18px;
-    /* Further reduced height */
-    border-radius: 2px;
-    /* Sharper */
+    height: 24px;
+    border-radius: 4px;
     padding: 0;
 }
 
