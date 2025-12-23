@@ -109,7 +109,8 @@ header h1 {
 .settings-btn {
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
+  /* Moved to left */
   z-index: 100;
   background: white;
   border: 2px solid var(--color-secondary);
@@ -127,7 +128,8 @@ header h1 {
 .settings-menu {
   position: absolute;
   top: 60px;
-  right: 10px;
+  left: 10px;
+  /* Moved to left */
   z-index: 101;
   background: white;
   border: 3px solid var(--color-primary);
@@ -163,5 +165,6 @@ header h1 {
 .limit-option.active {
   border-color: var(--color-primary);
   background-color: var(--color-primary-light);
-  color: white;
+  color: #333;
+  /* Darker text for visibility */
 }
