@@ -35,18 +35,20 @@
     background-color: var(--color-btn-digit);
     border: none;
     color: white;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
+    /* Smaller arrows */
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
 
-    /* Slim & Integrated Look */
+    /* Extra Slim Look */
     width: 100%;
-    height: 24px;
-    border-radius: 4px;
-    /* Small radius to match display */
+    height: 18px;
+    /* Further reduced height */
+    border-radius: 2px;
+    /* Sharper */
     padding: 0;
 }
 
